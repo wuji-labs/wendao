@@ -1,0 +1,40 @@
+name: ✨ Feature request
+description: Suggest an idea or improvement for Wendao
+labels: ['enhancement', 'needs-triage']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What problem does this solve? What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What would you like to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any alternative solutions or workarounds you've thought about.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - web (apps/miaoji)
+        - api (packages/miaoji-api)
+        - worker (pipeline)
+        - asr (apps/miaoji-asr)
+        - contracts (packages/miaoji-contracts)
+        - web-ui (packages/miaoji-web-ui)
+        - docker / deployment
+        - docs
+        - i18n / localization
+        - other
+    validations:
+      required: true

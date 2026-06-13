@@ -1,0 +1,37 @@
+{
+  "name": "@wuji/miaoji-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wendao web frontend · Next.js 16 + React 19 · upload → transcribe + diarize → AI minutes → collaborate/export",
+  "scripts": {
+    "dev": "next dev --turbopack -p 3101",
+    "build": "next build",
+    "start": "next start -p 3101",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.62.0",
+    "@trpc/client": "^11.0.0-rc.660",
+    "@trpc/react-query": "^11.0.0-rc.660",
+    "@trpc/server": "^11.0.0-rc.660",
+    "@wuji/miaoji-api": "workspace:*",
+    "@wuji/miaoji-contracts": "workspace:*",
+    "@wuji/miaoji-web-ui": "workspace:*",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.460.0",
+    "next": "16.2.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "sonner": "^1.7.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0-beta.6",
+    "@types/node": "^25.9.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.0-beta.6",
+    "typescript": "^5.7.0"
+  }
+}

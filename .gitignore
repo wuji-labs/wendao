@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+.next/
+out/
+dist/
+*.tsbuildinfo
+.turbo/
+
+# Environment
+.env
+.env.*
+!.env.example
+*.local
+
+# Local media / runtime storage
+.storage/
+
+# Python (ASR service)
+.venv/
+.venv-*/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+wheelhouse/
+
+# ML model weights & caches (downloaded at runtime)
+models/
+*.pt
+*.bin
+*.onnx
+*.tar.bz2
+.cache/
+huggingface/
+hf-cache/
+
+# Logs
+*.log
+logs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

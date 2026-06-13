@@ -1,0 +1,161 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Wendao — self-hosted transcription stack.
+#
+# Node path (no GPU required — ASR can point at an external/remote ASR URL):
+#     docker compose up postgres api worker web
+#
+# Full local stack WITH the GPU ASR service (needs an NVIDIA GPU + the
+# nvidia-container-toolkit on the host):
+#     docker compose --profile asr up
+#
+# Copy .env.example -> .env first; compose reads it via `env_file`. Note that
+# inside the compose network services reach each other by SERVICE NAME, so the
+# in-container DATABASE_URL / API URLs differ from the host-port values in .env
+# (they are overridden per-service below).
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── Postgres 16 ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-miaoji}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-miaoji}
+      POSTGRES_DB: ${POSTGRES_DB:-miaoji}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      # Exposed for host-side tooling (drizzle-kit migrate/studio, psql).
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-miaoji} -d ${POSTGRES_DB:-miaoji}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── API (Fastify + tRPC) ───────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: apps/miaoji-api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # In-network overrides (service names, not localhost).
+      DATABASE_URL: postgres://${POSTGRES_USER:-miaoji}:${POSTGRES_PASSWORD:-miaoji}@postgres:5432/${POSTGRES_DB:-miaoji}
+      HOST: 0.0.0.0
+      PORT: '3100'
+      MIAOJI_STORAGE_DIR: /app/.storage
+      MIAOJI_ASR_URL: http://asr:9400
+      # Ollama runs on the HOST (GPU/CPU LLM), reached via the docker bridge.
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
+    extra_hosts:
+      # Lets the container resolve the host machine (for host-run Ollama).
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - storage:/app/.storage
+    ports:
+      - '3100:3100'
+
+  # ── Worker (same image/build as api, different command) ─────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: apps/miaoji-api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-miaoji}:${POSTGRES_PASSWORD:-miaoji}@postgres:5432/${POSTGRES_DB:-miaoji}
+      MIAOJI_STORAGE_DIR: /app/.storage
+      MIAOJI_ASR_URL: http://asr:9400
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      # Shares the SAME storage volume as the api so it can read uploaded media.
+      - storage:/app/.storage
+    # Run the pipeline worker loop instead of the HTTP server.
+    command: ['node', '--import', 'tsx', 'src/pipeline/worker-loop.ts']
+
+  # ── Web (Next.js 16) ───────────────────────────────────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: apps/miaoji/Dockerfile
+      args:
+        # Inlined into the client bundle at build time; the browser hits the
+        # API through the Next same-origin rewrite, so the public base can stay
+        # same-origin in most deployments. Override for split-host setups.
+        NEXT_PUBLIC_MIAOJI_API_BASE: ${NEXT_PUBLIC_MIAOJI_API_BASE:-http://127.0.0.1:3100}
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      # Server-side rewrite target: reach the api by service name in-network.
+      MIAOJI_API_URL: http://api:3100
+      NEXT_PUBLIC_MIAOJI_API_BASE: ${NEXT_PUBLIC_MIAOJI_API_BASE:-http://127.0.0.1:3100}
+    ports:
+      - '3101:3101'
+
+  # ── ASR microservice (OPTIONAL · GPU · profile: asr) ───────────────────────
+  #
+  # Gated behind the `asr` profile so the default `up` never tries to build a
+  # multi-GB GPU image. Enable with:  docker compose --profile asr up
+  #
+  # GPU REQUIREMENTS:
+  #   * Host needs an NVIDIA GPU + driver + nvidia-container-toolkit.
+  #   * The `deploy.resources.reservations.devices` block below requests the
+  #     GPU (works with `docker compose up` on recent Docker). On older Docker
+  #     you can instead set, at the service level:   runtime: nvidia
+  #     and:  environment: { NVIDIA_VISIBLE_DEVICES: all }
+  #   * Build the image with a CUDA torch wheel for real speed:
+  #       docker compose build --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cu128 asr
+  #     (see apps/miaoji-asr/Dockerfile). Without it the image is CPU-only/slow.
+  #   * HF_TOKEN is required for pyannote speaker diarization (accept the model
+  #     terms at https://hf.co/pyannote/speaker-diarization-3.1).
+  asr:
+    profiles: [asr]
+    build:
+      context: apps/miaoji-asr
+      dockerfile: Dockerfile
+      # Uncomment for a GPU build (Blackwell example):
+      # args:
+      #   TORCH_INDEX_URL: https://download.pytorch.org/whl/cu128
+    restart: unless-stopped
+    environment:
+      MIAOJI_ASR_HOST: 0.0.0.0
+      MIAOJI_ASR_PORT: '9400'
+      ASR_DEVICE: ${ASR_DEVICE:-auto}
+      WHISPER_MODEL: ${WHISPER_MODEL:-large-v3}
+      # Required for speaker diarization (pyannote). Set in .env.
+      HF_TOKEN: ${HF_TOKEN:-}
+    volumes:
+      # Persist downloaded model weights (Whisper / wav2vec2 / pyannote) +
+      # voiceprint embedding models across restarts.
+      - asr-models:/app/models
+      - hf-cache:/app/.cache/huggingface
+    ports:
+      - '9400:9400'
+    # GPU reservation (NVIDIA). Comment out for a CPU-only run.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  pgdata:
+  storage:
+  asr-models:
+  hf-cache:

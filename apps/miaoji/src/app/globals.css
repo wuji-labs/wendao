@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+
+/* 妙记共享 UI 包 · mj- 命名空间 token + 同步高亮 class */
+@import '@wuji/miaoji-web-ui/theme.css';
+/* 让 Tailwind 扫描共享包源码以生成其使用到的工具类 */
+@source '../../../../packages/miaoji-web-ui/src/**/*.{ts,tsx}';
+
+@theme {
+  --font-sans: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'SFMono-Regular', ui-monospace, 'Cascadia Code', Consolas, monospace;
+}
+
+* {
+  border-color: var(--color-mj-border);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-mj-bg);
+  color: var(--color-mj-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 细滚动条 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-mj-border-strong);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-mj-ink-faint);
+  background-clip: padding-box;
+}

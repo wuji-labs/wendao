@@ -1,0 +1,29 @@
+# venv
+.venv/
+venv/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 模型缓存（whisper / wav2vec2 / pyannote 下载落地）
+*.pt
+*.bin
+*.onnx
+models/
+.cache/
+huggingface/
+torch/
+
+# 本地环境
+.env
+.env.local
+
+# 临时音频
+*.wav
+*.tmp

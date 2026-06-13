@@ -1,0 +1,51 @@
+# Keep build context small + reproducible. Anything generated, secret, or
+# host-specific must NOT be copied into the image (deps get re-installed,
+# builds get re-run inside the Dockerfiles).
+
+# Dependencies
+**/node_modules
+.pnpm-store
+
+# Build output / caches
+**/dist
+**/.next
+**/.turbo
+.turbo
+
+# Python (ASR service)
+**/.venv
+**/.venv*
+**/__pycache__
+**/*.pyc
+
+# Large / regenerable ML + media artifacts
+**/models
+**/wheelhouse
+**/.storage
+**/.cache
+
+# VCS + IDE
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Local env + secrets (compose injects env at runtime; never bake into image)
+.env
+**/.env
+.env.*
+!.env.example
+**/.env.*
+!**/.env.example
+secrets
+
+# Logs + temp
+**/*.log
+tmp
+**/tmp
+
+# Docs / meta not needed at build time
+*.md
+**/*.md
+!**/README.md

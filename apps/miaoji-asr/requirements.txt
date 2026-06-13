@@ -1,0 +1,33 @@
+# 妙记 ASR 微服务依赖
+# ============================================================================
+# 重要：这些依赖必须装进 3.11/3.12 的 venv —— ML wheels（torch/whisperx/
+# pyannote/faster-whisper）目前普遍尚不支持 Python 3.14。
+# 推荐 `uv venv --python 3.12 .venv`（见 run.ps1）。
+#
+# torch 必须匹配 CUDA：本机为 RTX 5090（Blackwell sm_120），需 CUDA 12.x 轮子
+#   （cu124 / cu128）。安装示例（Blackwell 建议 cu128，按 PyTorch 官网为准）：
+#     uv pip install torch --index-url https://download.pytorch.org/whl/cu128
+#   或 cu124：
+#     uv pip install torch --index-url https://download.pytorch.org/whl/cu124
+#   CPU-only（无 GPU 调试用）：
+#     uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+# 建议先按上面单独装好匹配 CUDA 的 torch，再 `uv pip install -r requirements.txt`。
+# ============================================================================
+
+# --- Web 框架（无 ML 依赖，CI 冒烟仅需这几个即可 import app.main）---
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2
+
+# --- ASR 主引擎：WhisperX（Whisper + wav2vec2 词级对齐 + pyannote 分离一条龙）---
+# 不可用时引擎自动回落 faster-whisper（见 app/engine.py）。
+whisperx>=3.1
+
+# --- ASR 回落引擎 ---
+faster-whisper>=1.0
+
+# --- 深度学习运行时（须匹配 CUDA，见文件头说明，通常单独装 torch）---
+torch>=2.2
+
+# --- 说话人分离（需 HF_TOKEN + 在 HF 接受 pyannote/speaker-diarization-3.1 条款）---
+pyannote.audio>=3.1

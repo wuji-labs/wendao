@@ -1,0 +1,47 @@
+{
+  "name": "@wuji/miaoji-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Wendao backend · Fastify + tRPC v11 + drizzle (postgres) · processing pipeline (ffmpeg transcode → ASR/diarize → segment → Ollama AI minutes → index)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./router": "./src/trpc/routers/index.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "dev:worker": "tsx watch src/pipeline/worker-loop.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx src/seed/index.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "@fastify/multipart": "^9.0.1",
+    "@fastify/static": "^8.0.3",
+    "@trpc/server": "^11.0.0-rc.660",
+    "@wuji/miaoji-contracts": "workspace:*",
+    "drizzle-orm": "^0.36.0",
+    "fastify": "^5.1.0",
+    "nanoid": "^5.0.9",
+    "openai": "^4.77.0",
+    "postgres": "^3.4.5",
+    "undici": "^8.4.1",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.0",
+    "cross-env": "^7.0.3",
+    "drizzle-kit": "^0.28.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.9"
+  }
+}

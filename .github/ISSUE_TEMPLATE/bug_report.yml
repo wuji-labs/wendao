@@ -1,0 +1,67 @@
+name: 🐞 Bug report
+description: Report a problem with Wendao
+labels: ['bug', 'needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug! Please search existing issues first to avoid duplicates.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including any error messages.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce it?
+      placeholder: |
+        1. Go to ...
+        2. Upload ...
+        3. See error ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - web (apps/miaoji)
+        - api (packages/miaoji-api)
+        - worker (pipeline)
+        - asr (apps/miaoji-asr)
+        - contracts (packages/miaoji-contracts)
+        - web-ui (packages/miaoji-web-ui)
+        - docker / deployment
+        - docs
+        - other / not sure
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, pnpm version, GPU (for ASR), deployment method (manual / Docker Compose).
+      placeholder: |
+        - OS: Ubuntu 24.04
+        - Node: 22.11.0
+        - pnpm: 9.15.0
+        - GPU: RTX 4090 (CUDA 12.8)
+        - Deployment: Docker Compose
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste any relevant log output. This will be automatically formatted as code.
+      render: shell

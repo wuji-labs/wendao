@@ -1,0 +1,50 @@
+{
+  "name": "wendao",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wendao — self-hosted meeting & media transcription with speaker diarization and AI minutes. A privacy-first, fully self-hosted alternative to Feishu Minutes / Otter.ai.",
+  "license": "MIT",
+  "homepage": "https://github.com/wuji-labs/wendao",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wuji-labs/wendao.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wuji-labs/wendao/issues"
+  },
+  "keywords": [
+    "transcription",
+    "speech-to-text",
+    "asr",
+    "whisper",
+    "whisperx",
+    "speaker-diarization",
+    "meeting-notes",
+    "self-hosted",
+    "ollama",
+    "nextjs",
+    "trpc"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo dev --parallel",
+    "build": "turbo build",
+    "type-check": "turbo type-check",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\"",
+    "db:migrate": "pnpm -F @wuji/miaoji-api db:migrate",
+    "db:seed": "pnpm -F @wuji/miaoji-api db:seed",
+    "db:seed:demo": "pnpm -F @wuji/miaoji-api exec tsx --env-file=.env src/seed/demo.ts"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.0"
+  }
+}

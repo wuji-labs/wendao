@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node:
+    name: Node (type-check · test · format)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # No committed lockfile guaranteed in early development, so don't use --frozen-lockfile.
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Type-check
+        run: pnpm -r type-check
+
+      - name: Test
+        run: pnpm -r test
+
+      - name: Format check
+        run: pnpm format:check
+
+  asr-smoke:
+    name: ASR import smoke test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/miaoji-asr
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The service is designed so its top-level import needs NO ML libraries
+      # (torch/whisperx/pyannote load lazily). This verifies that invariant.
+      - name: Install web-framework deps only
+        run: pip install "fastapi>=0.115" "uvicorn[standard]>=0.30" "pydantic>=2"
+
+      - name: Import smoke test
+        run: python -c "import app.main; print('app.main imported OK')"

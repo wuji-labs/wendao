@@ -1,0 +1,167 @@
+/* 闻道前端 · 命名空间化设计 token(mj- 前缀 · 与任何宿主主题零冲突)
+   宿主在自己的 globals.css 中 `@import "@wuji/miaoji-web-ui/theme.css";`
+   组件用 bg-mj-surface / text-mj-ink / border-mj-border / rounded-[var(--mj-radius)]
+   阴影 shadow-[var(--mj-shadow)] / 动效 animate-[mj-fade-in_...] 或 class .mj-wave 等 */
+@theme {
+  --color-mj-bg: #f6f4ef;
+  --color-mj-surface: #ffffff;
+  --color-mj-surface-2: #f1efe9;
+  --color-mj-ink: #1b1a17;
+  --color-mj-ink-soft: #54514a;
+  --color-mj-ink-faint: #908d84;
+  --color-mj-border: #e8e4db;
+  --color-mj-border-strong: #d6d1c6;
+  --color-mj-primary: #2563eb;
+  --color-mj-primary-soft: #eaf1fe;
+  --color-mj-accent: #b32a2a;
+  --color-mj-accent-soft: #fbeceb;
+  --color-mj-mark: #ffeeb0;
+  --color-mj-positive: #15805a;
+  --color-mj-positive-soft: #e7f5ee;
+  --color-mj-warn: #b7791f;
+  --mj-radius: 12px;
+}
+
+:root {
+  /* 柔和分层阴影(编辑级 · 非生硬) */
+  --mj-shadow-sm: 0 1px 2px rgba(28, 27, 24, 0.04), 0 1px 3px rgba(28, 27, 24, 0.06);
+  --mj-shadow: 0 2px 4px rgba(28, 27, 24, 0.04), 0 6px 16px rgba(28, 27, 24, 0.07);
+  --mj-shadow-pop: 0 8px 16px rgba(28, 27, 24, 0.06), 0 18px 40px rgba(28, 27, 24, 0.12);
+}
+
+.dark {
+  --color-mj-bg: #151418;
+  --color-mj-surface: #1d1c21;
+  --color-mj-surface-2: #26252b;
+  --color-mj-ink: #ece9e2;
+  --color-mj-ink-soft: #b8b5ad;
+  --color-mj-ink-faint: #8c8980;
+  --color-mj-border: #322f37;
+  --color-mj-border-strong: #44414a;
+  --color-mj-primary-soft: #15243d;
+  --color-mj-accent-soft: #3a1f1f;
+  --color-mj-positive-soft: #16291f;
+  --mj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --mj-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 6px 16px rgba(0, 0, 0, 0.4);
+  --mj-shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+/* 转写同步高亮 */
+.mj-word-active {
+  background: var(--color-mj-mark);
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(214, 178, 38, 0.35);
+}
+.mj-segment-active {
+  background: var(--color-mj-primary-soft);
+}
+.mj-hl-mark {
+  background: var(--color-mj-mark);
+  border-radius: 2px;
+}
+
+/* ── 动效 ── */
+@keyframes mj-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mj-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes mj-pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.6;
+  }
+  70% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes mj-wave {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@keyframes mj-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.mj-fade-in {
+  animation: mj-fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mj-spin {
+  animation: mj-spin 0.9s linear infinite;
+}
+
+/* 闻道音波处理动效(5 条) */
+.mj-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+}
+.mj-wave > i {
+  display: block;
+  width: 5px;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-mj-primary);
+  transform-origin: center;
+  animation: mj-wave 1.05s ease-in-out infinite;
+}
+.mj-wave > i:nth-child(1) {
+  animation-delay: 0s;
+}
+.mj-wave > i:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.mj-wave > i:nth-child(3) {
+  animation-delay: 0.24s;
+}
+.mj-wave > i:nth-child(4) {
+  animation-delay: 0.36s;
+}
+.mj-wave > i:nth-child(5) {
+  animation-delay: 0.48s;
+}
+
+/* 进度条流光(running 阶段) */
+.mj-progress {
+  position: relative;
+  overflow: hidden;
+}
+.mj-progress::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: mj-shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mj-wave > i,
+  .mj-spin,
+  .mj-fade-in,
+  .mj-progress::after {
+    animation: none;
+  }
+}
