@@ -17,6 +17,18 @@
 > [!NOTE]
 > 闻道全程跑在你自己的机器上：转写用本机 GPU 上的 Whisper 系开源模型,智能纪要用本机 [Ollama](https://ollama.com)。录音、转写、会议内容不出你的服务器。
 
+<p align="center">
+  <img src="docs/assets/transcript-detail.png" alt="闻道转写详情 —— 词级卡拉 OK 高亮、说话人分离、同步播放、AI 智能纪要" width="100%">
+  <br/>
+  <em>转写详情：词级卡拉 OK 高亮、说话人分离、同步播放、按需 AI 智能纪要 —— 全程自托管。</em>
+</p>
+
+<p align="center">
+  <img src="docs/assets/library.png" alt="闻道资料库 —— 文件夹、搜索、处理状态" width="100%">
+  <br/>
+  <em>资料库：文件夹、全文搜索、处理状态一目了然。</em>
+</p>
+
 ## ✨ 功能
 
 - **🎙️ 上传即转写**：上传音频 / 视频,自动语音识别,输出带**词级时间戳**的转写。

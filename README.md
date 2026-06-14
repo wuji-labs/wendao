@@ -18,7 +18,17 @@ English · [简体中文](README.zh-CN.md)
 > [!NOTE]
 > Wendao runs entirely on your own infrastructure. Transcription uses open Whisper-family models on your GPU; AI minutes use your local [Ollama](https://ollama.com). No audio, transcript, or meeting content ever leaves your servers.
 
-<!-- Add a hero screenshot/GIF of the transcript + AI-minutes view here. -->
+<p align="center">
+  <img src="docs/assets/transcript-detail.png" alt="Wendao transcript view — word-level karaoke highlighting, speaker diarization, synced player, and AI minutes" width="100%">
+  <br/>
+  <em>Transcript with word-level karaoke highlighting, speaker diarization, a synced player, and on-demand AI minutes — all self-hosted.</em>
+</p>
+
+<p align="center">
+  <img src="docs/assets/library.png" alt="Wendao library — folders, search, and processing status" width="100%">
+  <br/>
+  <em>Library — folders, full-text search, and processing status at a glance.</em>
+</p>
 
 ## ✨ Features
 

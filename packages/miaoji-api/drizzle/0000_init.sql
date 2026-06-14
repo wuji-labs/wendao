@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS "minutes" (
 	"playable_key" varchar(1024),
 	"duration_ms" bigint DEFAULT 0 NOT NULL,
 	"language" "lang" DEFAULT 'zh' NOT NULL,
+	"num_speakers" integer,
 	"status" "minute_status" DEFAULT 'UPLOADING' NOT NULL,
 	"error_message" text,
 	"visitor_count" integer DEFAULT 0 NOT NULL,
@@ -150,7 +151,10 @@ CREATE TABLE IF NOT EXISTS "speakers" (
 	"word_count" integer DEFAULT 0 NOT NULL,
 	"speaking_ratio" double precision DEFAULT 0 NOT NULL,
 	"order_index" integer DEFAULT 0 NOT NULL,
-	"color_hex" varchar(7)
+	"color_hex" varchar(7),
+	"embedding" jsonb,
+	"embedding_model" varchar(64),
+	"voiceprint_id" uuid
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "summaries" (
@@ -190,6 +194,19 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "voiceprints" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"owner_id" uuid NOT NULL,
+	"name" varchar(64) NOT NULL,
+	"embedding" jsonb NOT NULL,
+	"sample_count" integer DEFAULT 1 NOT NULL,
+	"embedding_model" varchar(64) DEFAULT 'campplus_zh' NOT NULL,
+	"samples" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"enrolled_from_minute_id" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "chapters_minute_idx" ON "chapters" USING btree ("minute_id","order_index");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "clips_minute_idx" ON "clips" USING btree ("minute_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "collaborators_subject_idx" ON "collaborators" USING btree ("subject_type","subject_id");--> statement-breakpoint
@@ -210,4 +227,5 @@ CREATE INDEX IF NOT EXISTS "segments_minute_order_idx" ON "segments" USING btree
 CREATE INDEX IF NOT EXISTS "segments_speaker_idx" ON "segments" USING btree ("speaker_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "speakers_minute_idx" ON "speakers" USING btree ("minute_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "todos_minute_idx" ON "todos" USING btree ("minute_id");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "translations_seg_lang_idx" ON "translations" USING btree ("segment_id","target_lang");
+CREATE UNIQUE INDEX IF NOT EXISTS "translations_seg_lang_idx" ON "translations" USING btree ("segment_id","target_lang");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "voiceprints_owner_idx" ON "voiceprints" USING btree ("owner_id");
