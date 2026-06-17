@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { eq, sql } from 'drizzle-orm'
 import type { DB } from '../db/index.js'
+import { sql as pgSql } from '../db/index.js'
 import {
   minutes,
   speakers as speakersTbl,
@@ -65,10 +66,48 @@ async function finishJob(
     .where(eq(jobs.id, jobId))
 }
 
+/** advisory lock 命名空间(int4)· 'mj' · 避免与他处 advisory lock 撞键 */
+const PIPELINE_LOCK_NS = 0x6d6a
+
+/**
+ * 流水线单飞入口(跨进程互斥)。
+ *
+ * 上传时 API 进程可经 enqueue() 直接跑 runPipeline,后台 worker 又轮询同一条;二者各持
+ * 「进程内」内存锁、互不可见 → 两个 runPipeline 并发处理同一 minute,各跑一遍 ASR,
+ * segments/speakers 翻倍重复。
+ *
+ * 根治:Postgres advisory lock(独占连接 hold 至结束)做跨进程单飞——同一 minute 同时只允许
+ * 一个运行体处理。未抢到 = 别人正在处理 → 静默跳过。进程崩溃/连接断时 advisory lock 自动释放,
+ * 下一轮轮询自愈,无死锁。
+ */
+export async function runPipeline(db: DB, minuteId: string): Promise<void> {
+  const conn = await pgSql.reserve()
+  let locked = false
+  try {
+    const rows = await conn<{ locked: boolean }[]>`
+      select pg_try_advisory_lock(${PIPELINE_LOCK_NS}::int4, hashtext(${minuteId})::int4) as locked`
+    locked = rows[0]?.locked === true
+    if (!locked) {
+      console.log(`[pipeline] minute ${minuteId} 已被其他运行体处理中,跳过(advisory lock 未获)`)
+      return
+    }
+    await runPipelineInner(db, minuteId)
+  } finally {
+    if (locked) {
+      try {
+        await conn`select pg_advisory_unlock(${PIPELINE_LOCK_NS}::int4, hashtext(${minuteId})::int4)`
+      } catch {
+        /* 解锁失败无碍:连接 release/关闭时该 session 的 advisory lock 自动失效 */
+      }
+    }
+    conn.release()
+  }
+}
+
 /**
  * 运行整条流水线。任一阶段失败 → 该 job + minute 标 FAILED 并抛出。
  */
-export async function runPipeline(db: DB, minuteId: string): Promise<void> {
+async function runPipelineInner(db: DB, minuteId: string): Promise<void> {
   const minute = await db.query.minutes.findFirst({ where: eq(minutes.id, minuteId) })
   if (!minute) throw new Error(`minute ${minuteId} not found`)
   if (!minute.mediaKey) throw new Error(`minute ${minuteId} has no mediaKey`)
