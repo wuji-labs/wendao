@@ -183,3 +183,7 @@ Built on the shoulders of [OpenAI Whisper](https://github.com/openai/whisper), [
 Made with care by **WUJI Labs**.
 
 </div>
+
+## 联系 · Contact
+扫码添加无极微信，交流合作 · Scan to add WUJI on WeChat
+<img src="assets/wechat-qr.png" width="200" alt="WUJI WeChat QR">
