@@ -14,6 +14,11 @@
 
 </div>
 
+<p align="center">
+  <img src="assets/wechat-personal.jpg" alt="Add WUJI on WeChat" width="200">
+</p>
+<p align="center">扫码添加作者微信</p>
+
 > [!NOTE]
 > 闻道全程跑在你自己的机器上：转写用本机 GPU 上的 Whisper 系开源模型,智能纪要用本机 [Ollama](https://ollama.com)。录音、转写、会议内容不出你的服务器。
 
